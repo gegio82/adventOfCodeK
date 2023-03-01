@@ -1,21 +1,10 @@
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-
-
 fun main() {
+    fun CharSequence.allUnique() = toSet().count() == length
 
-    @Throws(IOException::class)
-    fun execute(line: String, charNumber: Int): Int {
-        var position = -1
-        for (i in 0 until line.length - charNumber) {
-            if (line.substring(i, i + charNumber).chars().distinct().count() == charNumber.toLong()) {
-                position = i + charNumber
-                break
-            }
-        }
-        return position
-    }
+    fun execute(line: String, charNumber: Int): Int =
+        line.windowedSequence(charNumber).indexOfFirst {
+            it.allUnique()
+        } + charNumber
 
     fun part1(input: String): Int {
         return execute(input, 4)

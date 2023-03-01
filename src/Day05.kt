@@ -1,7 +1,5 @@
 import java.io.IOException
 import java.util.Stack
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 fun interface Mover {
     fun move(stacks: List<Stack<Char>>, howMany: Int, from: Int, to: Int)
@@ -10,39 +8,35 @@ fun interface Mover {
 data class MoveAction(val howMany: Int, val from: Int, val to: Int)
 
 fun main() {
-    val MOVE_COMMAND = Pattern.compile("move (\\d+) from (\\d+) to (\\d+)")
 
     @Throws(IOException::class)
-    fun parseInput(input: List<String>): Pair<List<Stack<Char>>, List<MoveAction>> {
+    fun parseInput(input: String): Pair<List<Stack<Char>>, List<MoveAction>> {
         val stacks: MutableList<Stack<Char>> = ArrayList()
-        val actions: MutableList<MoveAction> = ArrayList()
-        for (line in input) {
-            val matcher: Matcher = MOVE_COMMAND.matcher(line)
-            if (matcher.matches()) {
-                val howMany = matcher.group(1).toInt()
-                val from = matcher.group(2).toInt()
-                val to = matcher.group(3).toInt()
-                actions.add(MoveAction(howMany, from, to))
-            } else {
-                var i = 0
-                while (1 + i * 4 < line.length) {
-                    if (stacks.size <= i) {
-                        for (j in stacks.size..i) {
-                            stacks.add(Stack())
-                        }
+        val inputSections = input.split("\n\n")
+        for (line in inputSections[0].lines()) {
+            var i = 0
+            while (1 + i * 4 < line.length) {
+                if (stacks.size <= i) {
+                    for (j in stacks.size..i) {
+                        stacks.add(Stack())
                     }
-                    val current = line[1 + i * 4]
-                    if (Character.isLetter(current)) {
-                        stacks[i].add(0, current)
-                    }
-                    i++
                 }
+                val current = line[1 + i * 4]
+                if (Character.isLetter(current)) {
+                    stacks[i].add(0, current)
+                }
+                i++
             }
+
         }
+        val actions = inputSections[1]
+            .split("\n")
+            .map{ it.lines()}
+            .map{MoveAction(it[1].toInt(), it[3].toInt(), it[5].toInt())}
         return stacks to actions
     }
 
-    fun execute(input: List<String>, mover: Mover): String {
+    fun execute(input: String, mover: Mover): String {
         val (stacks, actions) = parseInput(input)
         actions.forEach {
             (howMany, from, to) -> mover.move(stacks, howMany, from, to)
@@ -71,21 +65,21 @@ fun main() {
         }
     }
 
-    fun part1(input: List<String>): String {
+    fun part1(input: String): String {
         return execute(input, ::move)
     }
 
-    fun part2(input: List<String>): String {
+    fun part2(input: String): String {
         return execute(input, ::moveKeepingOrder)
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInputByLine("Day05_test")
+    val testInput = readInput("Day05_test")
     val part1 = part1(testInput)
     check(part1 == "CMZ")
     check(part2(testInput) == "MCD")
 
-    val input = readInputByLine("Day05")
+    val input = readInput("Day05")
     part1(input).println()
     part2(input).println()
 }
