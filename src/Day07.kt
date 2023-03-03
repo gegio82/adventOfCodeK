@@ -53,15 +53,17 @@ fun getAllDirectories(allLines:List<String>): List<Directory> {
             } else {
                 currentDir?.getSubDirectory(dirName) ?: root
             }
+            i++
+            continue
         }
         val lsMatcher = LS_COMMAND.matcher(command)
         if (lsMatcher.matches()) {
             assert(currentDir != null)
-            var fsObject = allLines[i + 1]
-            var fileMatcher = FILE.matcher(fsObject)
-            var dirMatcher = DIR.matcher(fsObject)
-            while (fileMatcher.matches() || dirMatcher.matches()) {
-                i++
+            i++
+            while (i < allLines.size) {
+                val fsObject = allLines[i]
+                val fileMatcher = FILE.matcher(fsObject)
+                val dirMatcher = DIR.matcher(fsObject)
                 if (fileMatcher.matches()) {
                     val size = fileMatcher.group(1).toInt()
                     val fileName = fileMatcher.group(2)
@@ -71,16 +73,12 @@ fun getAllDirectories(allLines:List<String>): List<Directory> {
                     val child = Directory(currentDir, dirName)
                     currentDir!!.addChild(child)
                     allDirectories.add(child)
-                }
-                if (i + 1 == allLines.size) {
+                } else {
                     break
                 }
-                fsObject = allLines[i + 1]
-                fileMatcher = FILE.matcher(fsObject)
-                dirMatcher = DIR.matcher(fsObject)
+                i++
             }
         }
-        i++
     }
     return allDirectories
 }
